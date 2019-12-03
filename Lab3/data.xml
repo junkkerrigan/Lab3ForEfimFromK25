@@ -8,6 +8,7 @@
 	   </description>
 		<calories>650</calories>
 		<mealTime>Breakfast</mealTime>
+		<presentationTime>Season</presentationTime>
 	</dish>
 	<dish>
 		<name>Strawberry Belgian Waffles</name>
@@ -17,6 +18,7 @@
 		</description>
 		<calories>900</calories>
 		<mealTime>Breakfast</mealTime>
+		<presentationTime>Exclusive</presentationTime>
 	</dish>
 	<dish>
 		<name>Berry-Berry Belgian Waffles</name>
@@ -26,6 +28,7 @@
 		</description>
 		<calories>900</calories>
 		<mealTime>Breakfast</mealTime>
+		<presentationTime>Exclusive</presentationTime>
 	</dish>
 	<dish>
 		<name>French Toast</name>
@@ -35,6 +38,7 @@
 		</description>
 		<calories>600</calories>
 		<mealTime>Breakfast</mealTime>
+		<presentationTime>Regular</presentationTime>
 	</dish>
 	<dish>
 		<name>Homestyle Breakfast</name>
@@ -44,6 +48,7 @@
 		</description>
 		<calories>950</calories>
 		<mealTime>Breakfast</mealTime>
+		<presentationTime>Regular</presentationTime
 	</dish>
 	<dish>
 		<name>Borsch</name>
@@ -53,6 +58,7 @@
 		</description>
 		<calories>250</calories>
 		<mealTime>Dinner</mealTime>
+		<presentationTime>Season</presentationTime>
 	</dish>
 	<dish>
 		<name>Soup</name>
@@ -62,6 +68,7 @@
 		</description>
 		<calories>500</calories>
 		<mealTime>Dinner</mealTime>
+		<presentationTime>Regular</presentationTime>
 	</dish>
 	<dish>
 		<name>Porridge</name>
@@ -71,6 +78,8 @@
 		</description>
 		<calories>300</calories>
 		<mealTime>Dinner</mealTime>
+		<presentationTime>Regular</presentationTime>
+
 	</dish>
 	<dish>
 		<name>Pizza</name>

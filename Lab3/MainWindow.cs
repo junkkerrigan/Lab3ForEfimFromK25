@@ -1,365 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Globalization;
 using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Xml;
-using System.Xml.Linq;
 using System.Xml.Xsl;
 
 namespace Lab3
 {
-    public static class FilterTools
-    {
-        public static int LINQ { get; set; } = 0;
-        public static int DOM { get; set; } = 1;
-        public static int SAX { get; set; } = 2;
-    }
-
-    public class BookInfo 
-    {
-        public string Author { get; set; }
-        public string Title { get; set; }
-        public string Description { get; set; }
-        public string Genre { get; set; }
-        public string Price { get; set; }
-        public string Year { get; set; }
-
-        public string InfoToDisplay(int cnt)
-        {
-            return
-                $"Book No.{cnt}\n" +
-                $"Author: {Author}\n" +
-                $"Title: {Title}\n" +
-                $"Description: {Description}\n" +
-                $"Genre: {Genre}\n" +
-                $"Price: {Price}\n" +
-                $"Year: {Year}\n";
-        }
-    }
-
-    public class BookFilter 
-    {
-        public string Title { get; set; } = string.Empty;
-        public string Author { get; set; } = string.Empty;
-        public string Genre { get; set; } = string.Empty;
-        public string Description { get; set; } = string.Empty;
-        public float PriceFrom { get; set; } = float.MinValue;
-        public float PriceTo { get; set; } = float.MaxValue;
-        public float YearFrom { get; set; } = float.MinValue;
-        public float YearTo { get; set; } = float.MaxValue;
-
-        static class DefaultFilterValues
-        {
-            public static class InvalidFilter
-            {
-                public static int YearFrom { get; } = int.MaxValue;
-                public static int YearTo { get; } = int.MinValue;
-                public static float PriceFrom { get; } = float.MaxValue;
-                public static float PriceTo { get; } = float.MinValue;
-            }
-
-            public static class EmptyFilter
-            {
-                public static int YearFrom { get; } = int.MinValue;
-                public static int YearTo { get; } = int.MaxValue;
-                public static float PriceFrom { get; } = float.MinValue;
-                public static float PriceTo { get; } = float.MaxValue;
-            }
-        }
-
-        static NumberFormatInfo nfi = new NumberFormatInfo
-        {
-            NumberDecimalSeparator = "."
-        };
-        abstract class FilterException : ArgumentException
-        {
-            public FilterException() : base()
-            {
-            }
-        }
-        class FilterEmptyException : FilterException
-        {
-            public FilterEmptyException() : base()
-            {
-            }
-        }
-        class FilterInvalidException : FilterException
-        {
-            public FilterInvalidException() : base()
-            {
-            }
-        }
-
-        float ConvertFilterToFloat(string num)
-        {
-            if (string.IsNullOrWhiteSpace(num))
-            {
-                throw new FilterEmptyException();
-            }
-            try
-            {
-                return Convert.ToSingle(num, nfi);
-            }
-            catch
-            {
-                throw new FilterInvalidException();
-            }
-        }
-        
-        public void SetFilter(string name, string value)
-        {
-            PropertyInfo filterToSet = GetType().GetProperty(name);
-            Type filterType = filterToSet.PropertyType;
-            if (filterType == typeof(string))
-            {
-               filterToSet.SetValue(this, value.Trim().ToLower());
-            }
-            else 
-            {
-                try
-                {
-                    float converted = ConvertFilterToFloat(value);
-                    filterToSet.SetValue(this, converted);
-                }
-                catch (FilterEmptyException)
-                {
-                    filterToSet.SetValue(this, 
-                        typeof(DefaultFilterValues.EmptyFilter).GetProperty(name)
-                        .GetValue(this));
-                }
-                catch(FilterInvalidException)
-                {
-                    filterToSet.SetValue(this,
-                        typeof(DefaultFilterValues.InvalidFilter).GetProperty(name)
-                        .GetValue(this));
-                }
-            }
-        }
-
-        public bool IsMatch(BookInfo candidate)
-        {
-            return (
-                candidate.Author.ToLower().Contains(Author)
-                && candidate.Title.ToLower().Contains(Title)
-                && candidate.Genre.ToLower().Contains(Genre)
-                && candidate.Description.ToLower().Contains(Description)
-                && (Convert.ToSingle(candidate.Price, nfi) >= PriceFrom)
-                && (Convert.ToSingle(candidate.Price, nfi) <= PriceTo)
-                && (Convert.ToSingle(candidate.Year, nfi) >= YearFrom)
-                && (Convert.ToSingle(candidate.Year, nfi) <= YearTo)
-                );
-        }
-    }
-
-    public class ResultData
-    {
-        public string BookData { get; set; } = string.Empty;
-        public string[] Authors { get; set; }
-        public string[] Titles { get; set; }
-        public string[] Genres { get; set; }
-    }
-
-    public interface XMLParser
-    {
-        ResultData FilterBy(BookFilter filter);
-
-        void Load(string file);
-    }
-
-    public class LINQParser : XMLParser
-    {
-        List<BookInfo> Books;
-
-        public LINQParser(string file)
-        {
-            Load(file);
-        }
-
-        public void Load(string file)
-        {
-            XDocument XMLData = XDocument.Load(file);
-            Books = new List<BookInfo>(
-                from book in XMLData.Element("catalog").Elements("book")
-                select new BookInfo()
-                {
-                    Title = book.Element("title").Value,
-                    Author = book.Element("author").Value,
-                    Genre = book.Element("genre").Value,
-                    Description = book.Element("description").Value,
-                    Price = book.Element("price").Value,
-                    Year = book.Element("publishYear").Value,
-                });
-        }
-
-        public ResultData FilterBy(BookFilter filter)
-        {
-            List<BookInfo> match = new List<BookInfo>(
-                from book in Books
-                where filter.IsMatch(book)
-                select book);
-            string dataToDisplay = "";
-            for (int i = 0; i < match.Count(); i++)
-            {
-                dataToDisplay += match[i].InfoToDisplay(i + 1) + '\n';
-            }
-
-            return new ResultData()
-            {
-                BookData = dataToDisplay,
-                Titles = (from book in match
-                    select book.Title)
-                    .Distinct().ToArray(),
-                Authors = (from book in match
-                    select book.Author)
-                    .Distinct().ToArray(),
-                Genres = (from book in match
-                    select book.Genre)
-                    .Distinct().ToArray(),
-            };
-        }
-    }
-
-    public class DOMParser : XMLParser
-    {
-        XmlDocument xmlDoc = new XmlDocument();
-
-        public DOMParser(string file)
-        {
-            Load(file);
-        }
-
-        public ResultData FilterBy(BookFilter filter)
-        {
-            var bookNodes = xmlDoc.SelectNodes("//book");
-            
-            var dataToDisplay = "";
-            List<string> titles = new List<string>();
-            List<string> authors = new List<string>();
-            List<string> genres = new List<string>();
-            int i = 0;
-            foreach (XmlNode node in bookNodes)
-            {
-                BookInfo book = new BookInfo()
-                {
-                    Title = node.SelectSingleNode("title").InnerText,
-                    Author = node.SelectSingleNode("author").InnerText,
-                    Genre = node.SelectSingleNode("genre").InnerText,
-                    Description = node.SelectSingleNode("description").InnerText,
-                    Price = node.SelectSingleNode("price").InnerText,
-                    Year = node.SelectSingleNode("publishYear").InnerText,
-                };
-                if (filter.IsMatch(book))
-                {
-                    i++;
-                    dataToDisplay += book.InfoToDisplay(i) + '\n';
-                    titles.Add(book.Title);
-                    authors.Add(book.Author);
-                    genres.Add(book.Genre);
-                }
-            }
-
-            return new ResultData()
-            {
-                BookData = dataToDisplay,
-                Titles = titles.Distinct().ToArray(),
-                Authors = authors.Distinct().ToArray(),
-                Genres = genres.Distinct().ToArray(),
-            };
-        }
-
-        public void Load(string file)
-        {
-            xmlDoc.Load(file);
-        }
-    }
-
-    public class SAXParser : XMLParser
-    {
-        XmlReader xmlReader;
-
-        public SAXParser(string file)
-        {
-            Load(file);
-        }       
-
-        public ResultData FilterBy(BookFilter filter)
-        {
-            BookInfo book = null;
-            int i = 0;
-            var dataToDisplay = "";
-            List<string> titles = new List<string>();
-            List<string> authors = new List<string>();
-            List<string> genres = new List<string>();
-
-            while (xmlReader.Read())
-            {
-                switch (xmlReader.NodeType)
-                {
-                    case XmlNodeType.Element:
-                        switch(xmlReader.Name)
-                        {
-                            case "book":
-                                book = new BookInfo();
-                                break;
-                            case "title":
-                                book.Title = xmlReader.Value;
-                                titles.Add(xmlReader.Value);
-                                break;
-                            case "author":
-                                book.Author = xmlReader.Value;
-                                authors.Add(xmlReader.Value);
-                                break;
-                            case "genre":
-                                book.Genre = xmlReader.Value;
-                                genres.Add(xmlReader.Value);
-                                break;
-                            case "price":
-                                book.Price = xmlReader.Value;
-                                break;
-                            case "publishYear":
-                                book.Year = xmlReader.Value;
-                                break;
-                            default:
-                                break;
-                        }
-                        break;
-                    case XmlNodeType.EndElement:
-                        if (xmlReader.Name == "book")
-                        {
-                            if (filter.IsMatch(book))
-                            {
-                                i++;
-                                dataToDisplay += book.InfoToDisplay(i) + '\n';
-                            }
-                        }
-                        break;
-                    default:
-                        break;
-                }
-            }
-
-            return new ResultData()
-            {
-                BookData = dataToDisplay,
-                Authors = authors.Distinct().ToArray(),
-                Titles = titles.Distinct().ToArray(),
-                Genres = genres.Distinct().ToArray(),
-            };
-        }
-
-        public void Load(string file)
-        {
-            xmlReader = XmlReader.Create(file);
-        }
-    }
-
     public partial class MainWindow : Form
     {
         // GUI elements
@@ -376,8 +22,8 @@ namespace Lab3
         string HTMLTargetFile = "../../transformed.html";
 
         // logic elements
-        BookFilter CurrentFilter = new BookFilter(); // stores filters values
-        XMLParser Parser;
+        FilterOfDish CurrentFilter = new FilterOfDish(); // stores filters values
+        XMLAnalyzingStrategy Parser;
 
         public MainWindow()
         {
@@ -397,7 +43,7 @@ namespace Lab3
             SizeChanged += XMLDataVisualizator_SizeChanged;
             FormClosing += XMLDataVisualizator_Closing;
 
-            Parser = new LINQParser(XMLSourceFile);
+            Parser = new LINQStrategy(XMLSourceFile);
             FillVizualizator();
         }
 
@@ -651,9 +297,9 @@ namespace Lab3
         private void RadioButton_CheckedChanged(object sender, EventArgs e)
         {
             RadioButton selectedTool = sender as RadioButton;
-            if (selectedTool.Name == "LINQ") Parser = new LINQParser(XMLSourceFile);
-            else if (selectedTool.Name == "DOM") Parser = new DOMParser(XMLSourceFile);
-            //else if (selectedTool.Name == "SAX") Parser = new SAXParser(XMLSourceFile);
+            if (selectedTool.Name == "LINQ") Parser = new LINQStrategy(XMLSourceFile);
+            else if (selectedTool.Name == "DOM") Parser = new DOMStrategy(XMLSourceFile);
+            else if (selectedTool.Name == "SAX") Parser = new SAXStrategy(XMLSourceFile);
         }
 
         private void FilterChanged(object sender, EventArgs e)
@@ -664,14 +310,14 @@ namespace Lab3
                 TextBox f = sender as TextBox;
                 newValue = f.Text;
                 propName = f.Name;
-                CurrentFilter.SetFilter(propName, newValue);
+                CurrentFilter.ChangeFilter(propName, newValue);
             }
             else
             {
                 ComboBox f = sender as ComboBox;
                 newValue = f.Text;
                 propName = f.Name;
-                CurrentFilter.SetFilter(propName, newValue);
+                CurrentFilter.ChangeFilter(propName, newValue);
             }
         }
 
@@ -746,24 +392,24 @@ namespace Lab3
         // logic implementation
         private void FillVizualizator() // fills data depending on current filters
         {
-            var res = Parser.FilterBy(CurrentFilter);
+            var res = Parser.Analyze(CurrentFilter);
             ContentContainer.Text = 
-                String.IsNullOrWhiteSpace(res.BookData)
+                String.IsNullOrWhiteSpace(res.DishesList)
                 ? "Books not found :("
-                : res.BookData;
+                : res.DishesList;
 
             AuthorFilter.Items.Clear();
             TitleFilter.Items.Clear();
             GenreFilter.Items.Clear();
             
-            AuthorFilter.Items.AddRange(res.Authors.ToArray());
-            TitleFilter.Items.AddRange(res.Titles.ToArray());
+            AuthorFilter.Items.AddRange(res.MealTime.ToArray());
+            TitleFilter.Items.AddRange(res.Names.ToArray());
             GenreFilter.Items.AddRange(res.Genres.ToArray());
         }
 
         private void ResetFilters()
         {
-            CurrentFilter = new BookFilter();
+            CurrentFilter = new FilterOfDish();
             AuthorFilter.Text = "";
             TitleFilter.Text = "";
             GenreFilter.Text = "";
@@ -777,14 +423,14 @@ namespace Lab3
 
         private void ReloadFile()
         {
-            Parser.Load(XMLSourceFile);
+            Parser.GetXMLData(XMLSourceFile);
             FillVizualizator();
         }
 
         private void TransformToHTML()
         {
             XslCompiledTransform transform = new XslCompiledTransform();
-            transform.Load(XSLTSourceFile);
+            transform.GetXMLData(XSLTSourceFile);
             transform.Transform(XMLSourceFile, HTMLTargetFile);
         }
     }
