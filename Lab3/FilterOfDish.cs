@@ -15,7 +15,7 @@ namespace Lab3
         public string PresentationTime { get; set; } = "";
         public string Description { get; set; } = "";
         public float CaloriesFrom { get; set; } = -1e9F;
-        public float CaloriesTo { get; set; } = -1e9F;
+        public float CaloriesTo { get; set; } = 1e9F;
         public float PriceFrom { get; set; } = -1e9F;
         public float PriceTo { get; set; } = 1e9F;
 
@@ -66,10 +66,14 @@ namespace Lab3
             {
                 NumberDecimalSeparator = "."
             };
-            var match = (possible.Name.ToLower().Contains(Name)
-                && possible.MealTime.ToLower().Contains(MealTime)
-                && possible.PresentationTime.ToLower().Contains(PresentationTime)
-                && possible.Description.ToLower().Contains(Description)
+            Console.WriteLine(Convert.ToSingle(possible.Price, nfi) >= PriceFrom);
+            Console.WriteLine(Convert.ToSingle(possible.Price, nfi) <= PriceTo);
+            Console.WriteLine(Convert.ToSingle(possible.Calories, nfi) >= CaloriesFrom);
+            Console.WriteLine(Convert.ToSingle(possible.Calories, nfi) <= CaloriesTo);
+            var match = (possible.Name.ToLower().Contains(Name.ToLower())
+                && possible.MealTime.ToLower().Contains(MealTime.ToLower())
+                && possible.PresentationTime.ToLower().Contains(PresentationTime.ToLower())
+                && possible.Description.ToLower().Contains(Description.ToLower())
                 && (Convert.ToSingle(possible.Price, nfi) >= PriceFrom)
                 && (Convert.ToSingle(possible.Price, nfi) <= PriceTo)
                 && (Convert.ToSingle(possible.Calories, nfi) >= CaloriesFrom)

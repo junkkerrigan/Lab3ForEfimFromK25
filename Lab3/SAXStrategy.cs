@@ -42,15 +42,19 @@ namespace Lab3
                                 dish.Name = Reader.Value;
                                 names.Add(Reader.Value);
                                 break;
-                            case "author":
+                            case "mealTime":
                                 Reader.Read();
                                 dish.MealTime = Reader.Value;
                                 mealtimes.Add(Reader.Value);
                                 break;
-                            case "genre":
+                            case "presentationTime":
                                 Reader.Read();
                                 dish.PresentationTime = Reader.Value;
                                 presentationtimes.Add(Reader.Value);
+                                break;
+                            case "description":
+                                Reader.Read();
+                                dish.Price = Reader.Value.Trim();
                                 break;
                             case "price":
                                 Reader.Read();

@@ -8,20 +8,15 @@ namespace Lab3
 {
     public partial class MainWindow : Form
     {
-        TextBox DishesData, DescriptionFilter, FilterForMinPrice, PriceToFilter, FilterForMinCalories, FilterForMaxCalories;
+        TextBox FilterForDescription, FilterForMinPrice, FilterForMaxPrice, FilterForMinCalories, FilterForMaxCalories;
+        RichTextBox DishesData;
         FilterOfDish RealDataOfFilters = new FilterOfDish(); 
         
         public MainWindow()
         {
             InitializeComponent();
-            DishesData = new TextBox();
-            DishesData.Location = new Point(30, 60);
-            DishesData.Size = new Size((Width - 120) / 2, ClientSize.Height - 80);
-            SizeChanged += MainWindowSizeChanged;
-            FormClosing += MainWindowClosed;
-            Parser = new LINQStrategy(PathToXML);
-            Controls.Add(DishesData);
             AddElements();
+            Parser = new DOMStrategy(PathToXML);
             AddAnalyzData();
         }
         string PathToXSLT = "../../template.xsl";
@@ -36,6 +31,13 @@ namespace Lab3
         void AddElements()
         {
             AddFilters();
+            DishesData = new RichTextBox();
+            DishesData.Location = new Point(FilterForMealTime.Right + 50, 30);
+            DishesData.Size = new Size((Width - 120) / 2, ClientSize.Height - 60);
+            SizeChanged += MainWindowSizeChanged;
+            FormClosing += MainWindowClosed;
+            Parser = new LINQStrategy(PathToXML);
+            Controls.Add(DishesData);
             AddLabels();
             AddControlButtons();
             AddRadioButtons();
@@ -43,9 +45,9 @@ namespace Lab3
         void StrategyChanged(object sender, EventArgs e)
         {
             RadioButton selectedTool = sender as RadioButton;
-            if (selectedTool.Name == "AnalyzeLINQ") Parser = new LINQStrategy(PathToXML);
-            else if (selectedTool.Name == "AnalyzeDOM") Parser = new DOMStrategy(PathToXML);
-            else if (selectedTool.Name == "AnalyzeSAX") Parser = new SAXStrategy(PathToXML);
+            if (selectedTool.Name == "LINQ") Parser = new LINQStrategy(PathToXML);
+            else if (selectedTool.Name == "DOM") Parser = new DOMStrategy(PathToXML);
+            else if (selectedTool.Name == "SAX") Parser = new SAXStrategy(PathToXML);
         }
         void AddRadioButtons()
         {
@@ -55,6 +57,7 @@ namespace Lab3
                 Name = "DOM",
                 Height = 30,
                 Font = new Font("Times New Roman", 12),
+                Checked = true,
                 Location = new Point(Analyze.Left + 10, Analyze.Bottom + 15),
             };
             AnalyzeDOM.CheckedChanged += StrategyChanged;
@@ -73,7 +76,6 @@ namespace Lab3
             {
                 Text = "LINQ",
                 Name = "LINQ",
-                Checked = true,
                 Height = 30,
                 Font = new Font("Times New Roman", 12),
                 Location = new Point(AnalyzeSAX.Right, AnalyzeSAX.Top),
@@ -83,94 +85,85 @@ namespace Lab3
         }
         void AddFilters()
         {
-            FilterForMealTime = new ComboBox
-            {
-                Location = new Point(190 + DishesData.Width, 40),
-                Size = new Size(DishesData.Width - 130, 100),
-                Font = new Font("Times New Roman", 12),
-                Name = "MealTime",
-            };
-
             FilterForName = new ComboBox
             {
-                Location = new Point(190 + DishesData.Width,
-                FilterForMealTime.Bounds.Bottom + 20),
-                Size = new Size(DishesData.Width - 130, 100),
-                Font = new Font("Times New Roman", 12),
+                Location = new Point(150, 50),
+                Size = new Size((Width - 120) / 2 - 130, 100),
+                Font = new Font("Times New Roman", 14),
                 Name = "Name",
             };
-
-            DescriptionFilter = new TextBox
+            FilterForName.TextChanged += FilterChanged;
+            FilterForMealTime = new ComboBox
             {
-                Location = new Point(190 + DishesData.Width,
-                FilterForName.Bounds.Bottom + 20),
-                Size = new Size(DishesData.Width - 130, 100),
-                Font = new Font("Times New Roman", 12),
+                Location = new Point(150, FilterForName.Bounds.Bottom + 20),
+                Size = new Size((Width - 120) / 2 - 130, 100),
+                Font = new Font("Times New Roman", 14),
+                Name = "MealTime",
+            };
+            FilterForMealTime.TextChanged += FilterChanged;
+            FilterForDescription = new TextBox
+            {
+                Location = new Point(150,
+                FilterForMealTime.Bounds.Bottom + 20),
+                Size = new Size((Width - 120) / 2 - 130, 100),
+                Font = new Font("Times New Roman", 14),
                 Name = "Description",
             };
-
+            FilterForDescription.TextChanged += FilterChanged;
             FilterForPresentationTime = new ComboBox
             {
-                Location = new Point(190 + DishesData.Width,
-                DescriptionFilter.Bounds.Bottom + 20),
-                Size = new Size(DishesData.Width - 130, 100),
-                Font = new Font("Times New Roman", 12),
+                Location = new Point(150,
+                FilterForDescription.Bounds.Bottom + 10),
+                Size = new Size((Width - 120) / 2 - 130, 100),
+                Font = new Font("Times New Roman", 14),
                 Name = "PresentationTime",
             };
-
+            FilterForPresentationTime.TextChanged += FilterChanged;
             FilterForMinCalories = new TextBox
             {
-                Location = new Point(190 + DishesData.Width,
+                Location = new Point(150,
                 FilterForPresentationTime.Bounds.Bottom + 20),
                 Size = new Size((FilterForMealTime.Width - 30) / 2, 100),
-                Font = new Font("Times New Roman", 10),
+                Font = new Font("Times New Roman", 12),
                 Name = "CaloriesFrom",
             };
-
+            FilterForMinCalories.TextChanged += FilterChanged;
             FilterForMaxCalories = new TextBox
             {
                 Location =
                 new Point(FilterForMinCalories.Right + 30,
                 FilterForPresentationTime.Bounds.Bottom + 20),
                 Size = new Size((FilterForMealTime.Width - 30) / 2, 100),
-                Font = new Font("Times New Roman", 10),
+                Font = new Font("Times New Roman", 12),
                 Name = "CaloriesTo",
             };
-
+            FilterForMaxCalories.TextChanged += FilterChanged;
             FilterForMinPrice = new TextBox
             {
                 Location =
-                new Point(190 + DishesData.Width,
+                new Point(FilterForMinCalories.Left,
                 FilterForMinCalories.Bounds.Bottom + 20),
                 Size = new Size((FilterForMealTime.Width - 30) / 2, 100),
-                Font = new Font("Times New Roman", 10),
+                Font = new Font("Times New Roman", 12),
                 Name = "PriceFrom",
             };
-
-            PriceToFilter = new TextBox
+            FilterForMinPrice.TextChanged += FilterChanged;
+            FilterForMaxPrice = new TextBox
             {
                 Location = new Point(FilterForMinCalories.Right + 30,
                 FilterForMinCalories.Bounds.Bottom + 20),
                 Size = new Size((FilterForMealTime.Width - 30) / 2, 100),
-                Font = new Font("Times New Roman", 10),
+                Font = new Font("Times New Roman", 12),
                 Name  = "PriceTo",
             };
-            
-            FilterForMealTime.TextChanged += FilterChanged;
-            FilterForPresentationTime.TextChanged += FilterChanged;
-            DescriptionFilter.TextChanged += FilterChanged;
-            FilterForName.TextChanged += FilterChanged;
-            FilterForMaxCalories.TextChanged += FilterChanged;
-            FilterForMinCalories.TextChanged += FilterChanged;
-            FilterForMinPrice.TextChanged += FilterChanged;
-            PriceToFilter.TextChanged += FilterChanged;
+            FilterForMaxPrice.TextChanged += FilterChanged;
 
             Controls.Add(FilterForMealTime);
             Controls.Add(FilterForName);
-            Controls.Add(DescriptionFilter);
+            Controls.Add(FilterForDescription);
             Controls.Add(FilterForPresentationTime);
             Controls.Add(FilterForMinPrice);
-            Controls.Add(PriceToFilter);
+            Controls.Add(FilterForMaxPrice);
             Controls.Add(FilterForMinCalories);
             Controls.Add(FilterForMaxCalories);
         }
@@ -178,56 +171,56 @@ namespace Lab3
         {
             DishName = new Label()
             {
-                Text = "Author:",
-                Location = new Point(DishesData.Width + 50, FilterForMealTime.Top + 2),
+                Text = "Name:",
+                Location = new Point(10, FilterForName.Top + 6),
                 Width = 140,
                 Font = new Font("Times New Roman", 12),
             };
             Description = new Label()
             {
-                Text = "Title:",
-                Location = new Point(DishesData.Width + 50, FilterForName.Top + 2),
+                Text = "Description:",
+                Location = new Point(10, FilterForDescription.Top + 4),
                 Width = 140,
                 Font = new Font("Times New Roman", 12),
             };
             MealTime = new Label()
             {
-                Text = "Description:",
-                Location = new Point(DishesData.Width + 50, DescriptionFilter.Top + 2),
+                Text = "Mealtime:",
+                Location = new Point(10, FilterForMealTime.Top + 4),
                 Width = 140,
                 Font = new Font("Times New Roman", 12),
             };
             PresentationTime = new Label()
             {
-                Text = "Genre:",
-                Location = new Point(DishesData.Width + 50, FilterForPresentationTime.Top + 2),
+                Text = "Time of presentation:",
+                Location = new Point(10, FilterForPresentationTime.Top + 4),
                 Width = 140,
                 Font = new Font("Times New Roman", 12),
             };
             Calories = new Label()
             {
-                Text = "Published:",
-                Location = new Point(DishesData.Width + 50, FilterForMinCalories.Top + 2),
+                Text = "Calories:           from",
+                Location = new Point(10, FilterForMinCalories.Top + 4),
                 Width = 140,
                 Font = new Font("Times New Roman", 12),
             };
             Price = new Label()
             {
-                Text = "Price:",
-                Location = new Point(DishesData.Width + 50, FilterForMinPrice.Top + 2),
+                Text = "Price:                from",
+                Location = new Point(10, FilterForMinPrice.Top + 4),
                 Width = 140,
                 Font = new Font("Times New Roman", 12),
             };
             L7 = new Label()
             {
-                Text = "-",
-                Location = new Point(FilterForMinCalories.Right + 5, FilterForMinCalories.Top),
+                Text = "to",
+                Location = new Point(FilterForMinCalories.Right + 5, FilterForMinCalories.Top + 4),
                 Font = new Font("Times New Roman", 12),
             };
             L8 = new Label()
             {
-                Text = "-",
-                Location = new Point(FilterForMinPrice.Right + 5, FilterForMinPrice.Top),
+                Text = "to",
+                Location = new Point(FilterForMinPrice.Right + 5, FilterForMinPrice.Top + 4),
                 Font = new Font("Times New Roman", 12),
             };
 
@@ -263,109 +256,40 @@ namespace Lab3
             Analyze = new Button()
             {
                 Text = "Analyze",
-                Location = new Point(DishName.Left + 20, FilterForMinPrice.Bottom + 30),
+                Location = new Point(DishName.Left + 40, FilterForMinPrice.Bottom + 30),
                 Font = new Font("Times New Roman", 10),
-                Size = new Size(80, 40),
+                Size = new Size(60, 40),
             };
             Analyze.Click += (s, e) => AddAnalyzData();
             Controls.Add(Analyze);
             SetEmptyFilter = new Button()
             {
                 Text = "Empty",
-                Location = new Point(Analyze.Bounds.Right + 30, Analyze.Bounds.Y),
+                Location = new Point(Analyze.Bounds.Right + 10, Analyze.Bounds.Y),
                 Font = new Font("Times New Roman", 10),
-                Size = new Size(80, 40),
+                Size = new Size(60, 40),
             };
             SetEmptyFilter.Click += (s, e) => SetEmptyFilterFilters();
             Controls.Add(SetEmptyFilter);
             LoadData = new Button()
             {
                 Text = "Load",
-                Location = new Point(SetEmptyFilter.Bounds.Right + 30, SetEmptyFilter.Bounds.Y),
+                Location = new Point(SetEmptyFilter.Bounds.Right + 10, SetEmptyFilter.Bounds.Y),
                 Font = new Font("Times New Roman", 10),
-                Size = new Size(100, 40),
+                Size = new Size(60, 40),
             };
             LoadData.Click += (s, e) => LoadDataFile();
             Controls.Add(LoadData);
             XSLT = new Button()
             {
-                Text = "XSLT To HTML",
-                Location = new Point((DishesData.Width - 200) / 2 + 30, 20),
+                Text = "HTML",
+                Location = new Point(LoadData.Right + 10, LoadData.Bounds.Y),
                 Font = new Font("Times New Roman", 10),
-                Size = new Size(200, 30),
+                Size = new Size(60, 40),
             };
             XSLT.Click += (s, e) => XSLTToHTML();
             Controls.Add(XSLT);
         }
-
-        void MainWindowSizeChanged(object sender, EventArgs e)
-        {
-            DishesData.Size = new Size((Width - 120) / 2, ClientSize.Height - 80);
-
-            FilterForMealTime.Location = new Point(190 + DishesData.Width, 40);
-            FilterForMealTime.Size = new Size(DishesData.Width - 130, 100);
-
-            FilterForName.Location = new Point(190 + DishesData.Width,
-                FilterForMealTime.Bounds.Bottom + 20);
-            FilterForName.Size = new Size(DishesData.Width - 130, 100);
-
-            DescriptionFilter.Location = new Point(190 + DishesData.Width,
-                FilterForName.Bounds.Bottom + 20);
-             DescriptionFilter.Size = new Size(DishesData.Width - 130, 100);
-
-            FilterForPresentationTime.Location = new Point(190 + DishesData.Width,
-                DescriptionFilter.Bounds.Bottom + 20);
-                FilterForPresentationTime.Size = new Size(DishesData.Width - 130, 100);
-
-            FilterForMinCalories.Location = new Point(190 + DishesData.Width,
-                FilterForPresentationTime.Bounds.Bottom + 20);
-            FilterForMinCalories.Size = new Size((FilterForMealTime.Width - 30) / 2, 100);
-
-            FilterForMaxCalories.Location =
-                new Point(FilterForMinCalories.Right + 30,
-                FilterForPresentationTime.Bounds.Bottom + 20);
-            FilterForMaxCalories.Size = new Size((FilterForMealTime.Width - 30) / 2, 100);
-
-            FilterForMinPrice.Location =
-                new Point(190 + DishesData.Width,
-                FilterForMinCalories.Bounds.Bottom + 20);
-            FilterForMinPrice.Size = new Size((FilterForMealTime.Width - 30) / 2, 100);
-
-            PriceToFilter.Location = new Point(FilterForMinCalories.Right + 30,
-                FilterForMinCalories.Bounds.Bottom + 20);
-            PriceToFilter.Size = new Size((FilterForMealTime.Width - 30) / 2, 100);
-
-            DishName.Location = new Point(DishesData.Width + 50, FilterForMealTime.Top + 2);
-            Description.Location = new Point(DishesData.Width + 50, FilterForName.Top + 2);
-            MealTime.Location = new Point(DishesData.Width + 50, DescriptionFilter.Top + 2);
-            PresentationTime.Location = new Point(DishesData.Width + 50, FilterForPresentationTime.Top + 2);
-            Calories.Location = new Point(DishesData.Width + 50, FilterForMinCalories.Top + 2);
-            Price.Location = new Point(DishesData.Width + 50, FilterForMinPrice.Top + 2);
-            L7.Location = new Point(FilterForMinCalories.Right + 5, FilterForMinCalories.Top);
-            L8.Location = new Point(FilterForMinPrice.Right + 5, FilterForMinPrice.Top);
-
-            Analyze.Location = new Point(FilterForMealTime.Right - 320 - 
-                (FilterForMealTime.Right - DishName.Left - 320) / 2, 
-                FilterForMinPrice.Bottom + 30);
-            SetEmptyFilter.Location = new Point(Analyze.Bounds.Right + 30, Analyze.Bounds.Y);
-            LoadData.Location = new Point(SetEmptyFilter.Bounds.Right + 30, SetEmptyFilter.Bounds.Y);
-
-            AnalyzeSAX.Location = new Point(Analyze.Left + 10, Analyze.Bottom + 15);
-            AnalyzeDOM.Location = new Point(AnalyzeSAX.Right, AnalyzeSAX.Top);
-            AnalyzeLINQ.Location = new Point(AnalyzeDOM.Right, AnalyzeSAX.Top);
-
-            XSLT.Location = new Point((DishesData.Width - 200) / 2 + 30, 20);
-        }
-
-        void MainWindowClosed(object sender, FormClosingEventArgs e)
-        {
-            var result = MessageBox.Show("Are you sure you want to leave?", "Exit confirmation",
-                MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-            if (result != DialogResult.Yes)
-                e.Cancel = true;
-        }
-
-
         void AddAnalyzData()
         {
             var res = Parser.Analyze(RealDataOfFilters);
@@ -387,32 +311,95 @@ namespace Lab3
             FilterForName.Items.AddRange(res.Names);
             FilterForPresentationTime.Items.AddRange(res.PresentationTimes);
         }
-
+        void LoadDataFile()
+        {
+            Parser.GetXMLData(PathToXML);
+            AddAnalyzData();
+        }
         void SetEmptyFilterFilters()
         {
             RealDataOfFilters = new FilterOfDish();
             FilterForMealTime.Text = "";
             FilterForName.Text = "";
             FilterForPresentationTime.Text = "";
-            DescriptionFilter.Text = ""; 
+            FilterForDescription.Text = ""; 
             FilterForMinPrice.Text = "";
-            PriceToFilter.Text = "";
+            FilterForMaxPrice.Text = "";
             FilterForMinCalories.Text = "";
             FilterForMaxCalories.Text = "";
             AddAnalyzData();
         }
-
-        void LoadDataFile()
+        void MainWindowSizeChanged(object sender, EventArgs e)
         {
-            Parser.GetXMLData(PathToXML);
-            AddAnalyzData();
-        }
 
+            FilterForMealTime.Size = new Size((Width - 120) / 2 - 130, 100);
+
+            DishesData.Size = new Size((Width - 120) / 2, ClientSize.Height - 60);
+            DishesData.Location = new Point(FilterForMealTime.Right + 50, 30);
+
+            FilterForName.Location = new Point(150,
+                FilterForMealTime.Bounds.Bottom + 20);
+            FilterForName.Size = new Size((Width - 120) / 2 - 130, 100);
+
+            FilterForDescription.Location = new Point(150,
+                FilterForName.Bounds.Bottom + 20);
+             FilterForDescription.Size = new Size((Width - 120) / 2 - 130, 100);
+
+            FilterForPresentationTime.Location = new Point(150,
+                FilterForDescription.Bounds.Bottom + 20);
+                FilterForPresentationTime.Size = new Size((Width - 120) / 2 - 130, 100);
+
+            FilterForMinCalories.Location = new Point(150,
+                FilterForPresentationTime.Bounds.Bottom + 20);
+            FilterForMinCalories.Size = new Size((FilterForMealTime.Width - 30) / 2, 100);
+
+            FilterForMaxCalories.Location =
+                new Point(FilterForMinCalories.Right + 30,
+                FilterForPresentationTime.Bounds.Bottom + 20);
+            FilterForMaxCalories.Size = new Size((FilterForMealTime.Width - 30) / 2, 100);
+
+            FilterForMinPrice.Location =
+                new Point(FilterForMinCalories.Left,
+                FilterForMinCalories.Bounds.Bottom + 20);
+            FilterForMinPrice.Size = new Size((FilterForMealTime.Width - 30) / 2, 100);
+
+            FilterForMaxPrice.Location = new Point(FilterForMinCalories.Right + 30,
+                FilterForMinCalories.Bounds.Bottom + 20);
+            FilterForMaxPrice.Size = new Size((FilterForMealTime.Width - 30) / 2, 100);
+
+            DishName.Location = new Point(10, FilterForMealTime.Top + 6);
+            Description.Location = new Point(10, FilterForName.Top + 4);
+            MealTime.Location = new Point(10, FilterForDescription.Top + 4);
+            PresentationTime.Location = new Point(10, FilterForPresentationTime.Top + 4);
+            Calories.Location = new Point(10, FilterForMinCalories.Top + 4);
+            Price.Location = new Point(10, FilterForMinPrice.Top + 4);
+            L7.Location = new Point(FilterForMinCalories.Right + 5, FilterForMinCalories.Top + 4);
+            L8.Location = new Point(FilterForMinPrice.Right + 5, FilterForMinPrice.Top + 4);
+
+            Analyze.Location = new Point(FilterForMealTime.Right - 300 - 
+                (FilterForMealTime.Right - DishName.Left - 320) / 2, 
+                FilterForMinPrice.Bottom + 30);
+            SetEmptyFilter.Location = new Point(Analyze.Bounds.Right + 10, Analyze.Bounds.Y);
+            LoadData.Location = new Point(SetEmptyFilter.Bounds.Right + 10, SetEmptyFilter.Bounds.Y);
+
+            AnalyzeSAX.Location = new Point(Analyze.Left + 10, Analyze.Bottom + 15);
+            AnalyzeDOM.Location = new Point(AnalyzeSAX.Right, AnalyzeSAX.Top);
+            AnalyzeLINQ.Location = new Point(AnalyzeDOM.Right, AnalyzeSAX.Top);
+
+            XSLT.Location = new Point(LoadData.Right + 10, LoadData.Bounds.Y);
+        }
         void XSLTToHTML()
         {
             XslCompiledTransform transform = new XslCompiledTransform();
             transform.Load(PathToXSLT);
             transform.Transform(PathToXML, PathToHTML);
+        }
+        void MainWindowClosed(object sender, FormClosingEventArgs e)
+        {
+            var result = MessageBox.Show("Are you sure you want to leave?", "Exit confirmation",
+                MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            if (result != DialogResult.Yes)
+                e.Cancel = true;
         }
     }
 }

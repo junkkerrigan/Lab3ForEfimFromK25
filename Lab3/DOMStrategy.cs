@@ -18,28 +18,26 @@ namespace Lab3
 
         public ResultOfParsing Analyze(FilterOfDish filter)
         {
-            var dishNodes = xmlDoc.SelectNodes("//dish");
-
-            var dataToDisplay = "";
+            var dishNodes = xmlDoc.SelectNodes("/menu/dish");
+            Console.WriteLine(dishNodes.Count);
             List<Dish> match = new List<Dish>();
             List<string> names = new List<string>();
             List<string> mealtimes = new List<string>();
             List<string> presentationtimes = new List<string>();
-            int i = 0;
             foreach (XmlNode node in dishNodes)
             {
                 Dish dish = new Dish()
                 {
                     Name = node.SelectSingleNode("name").InnerText,
-                    MealTime = node.SelectSingleNode("mealtime").InnerText,
-                    PresentationTime = node.SelectSingleNode("presentationtime").InnerText,
-                    Description = node.SelectSingleNode("description").InnerText,
+                    MealTime = node.SelectSingleNode("mealTime").InnerText,
+                    PresentationTime = node.SelectSingleNode("presentationTime").InnerText,
+                    Description = node.SelectSingleNode("description").InnerText.Trim(),
                     Price = node.SelectSingleNode("price").InnerText,
                     Calories = node.SelectSingleNode("calories").InnerText,
                 };
                 if (filter.CheckDish(dish))
                 {
-                    i++;
+                    Console.WriteLine(dish.DishToString(1));
                     match.Add(dish);
                     names.Add(dish.Name);
                     mealtimes.Add(dish.MealTime);
