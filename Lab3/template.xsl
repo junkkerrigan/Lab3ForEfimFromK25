@@ -1,11 +1,9 @@
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
-<xsl:template match="catalog">
+<xsl:template match="menu">
 
 <HTML>
 
 <BODY>
-
-<H2>Список дисків</H2> 
 
 <TABLE BORDER="2">
 
@@ -15,37 +13,37 @@
 
 <TH>
 
-<b>Назва композиції</b>
+<b>Name</b>
 
 </TH>
 
 <TH>
 
-<b>Виконавець</b>
+<b>Description</b>
 
 </TH>
 
 <TH>
 
-<b>Країна</b>
+<b>Mealtime</b>
 
 </TH>
 
 <TH>
 
-<b>Компанія-продюсер</b>
+<b>Time of presentation</b>
 
 </TH>
 
 <TH>
 
-<b>Ціна</b>
+<b>Calories</b>
 
 </TH>
 
 <TH>
 
-<b>Рік випуску</b>
+<b>Price</b>
 
 </TH>
 
@@ -55,43 +53,43 @@
 
 <TBODY>
 
-<xsl:for-each select="/*/cd">
+<xsl:for-each select="/*/dish">
 
 <TR>
 
 <TD>
 
-<b><xsl:value-of select="./title" /></b>
+<b><xsl:value-of select="./name" /></b>
 
 </TD>
 
 <TD>
 
-<b><xsl:value-of select="./artist" /></b>
+<b><xsl:value-of select="./description" /></b>
 
 </TD>
 
 <TD>
 
-<b><xsl:value-of select="./country" /></b>
+<b><xsl:value-of select="./mealTime" /></b>
 
 </TD>
 
 <TD>
 
-<b><xsl:value-of select="./company" /></b>
+<b><xsl:value-of select="./presentationTime" /></b>
+
+</TD>
+
+<TD>
+
+<b><xsl:value-of select="./calories" /></b>
 
 </TD>
 
 <TD>
 
 <b><xsl:value-of select="./price" /></b>
-
-</TD>
-
-<TD>
-
-<b><xsl:value-of select="./year" /></b>
 
 
 </TD>
