@@ -1,43 +1,93 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<breakfast_menu>
-<food>
-    <name>Belgian Waffles</name>
-    <price>$5.95</price>
-    <description>
-   Two of our famous Belgian Waffles with plenty of real maple syrup
-   </description>
-    <calories>650</calories>
-</food>
-<food>
-    <name>Strawberry Belgian Waffles</name>
-    <price>$7.95</price>
-    <description>
-    Light Belgian waffles covered with strawberries and whipped cream
-    </description>
-    <calories>900</calories>
-</food>
-<food>
-    <name>Berry-Berry Belgian Waffles</name>
-    <price>$8.95</price>
-    <description>
-    Belgian waffles covered with assorted fresh berries and whipped cream
-    </description>
-    <calories>900</calories>
-</food>
-<food>
-    <name>French Toast</name>
-    <price>$4.50</price>
-    <description>
-    Thick slices made from our homemade sourdough bread
-    </description>
-    <calories>600</calories>
-</food>
-<food>
-    <name>Homestyle Breakfast</name>
-    <price>$6.95</price>
-    <description>
-    Two eggs, bacon or sausage, toast, and our ever-popular hash browns
-    </description>
-    <calories>950</calories>
-</food>
-</breakfast_menu>
+<menu>
+	<dish>
+		<name>Belgian Waffles</name>
+		<price>5.95</price>
+		<description>
+	   Two of our famous Belgian Waffles with plenty of real maple syrup
+	   </description>
+		<calories>650</calories>
+		<mealTime>Breakfast</mealTime>
+	</dish>
+	<dish>
+		<name>Strawberry Belgian Waffles</name>
+		<price>7.95</price>
+		<description>
+		Light Belgian waffles covered with strawberries and whipped cream
+		</description>
+		<calories>900</calories>
+		<mealTime>Breakfast</mealTime>
+	</dish>
+	<dish>
+		<name>Berry-Berry Belgian Waffles</name>
+		<price>8.95</price>
+		<description>
+		Belgian waffles covered with assorted fresh berries and whipped cream
+		</description>
+		<calories>900</calories>
+		<mealTime>Breakfast</mealTime>
+	</dish>
+	<dish>
+		<name>French Toast</name>
+		<price>4.50</price>
+		<description>
+		Thick slices made from our homemade sourdough bread
+		</description>
+		<calories>600</calories>
+		<mealTime>Breakfast</mealTime>
+	</dish>
+	<dish>
+		<name>Homestyle Breakfast</name>
+		<price>6.95</price>
+		<description>
+		Two eggs, bacon or sausage, toast, and our ever-popular hash browns
+		</description>
+		<calories>950</calories>
+		<mealTime>Breakfast</mealTime>
+	</dish>
+	<dish>
+		<name>Borsch</name>
+		<price>10.95</price>
+		<description>
+			Ukrainian borsch, everything as you like
+		</description>
+		<calories>250</calories>
+		<mealTime>Dinner</mealTime>
+	</dish>
+	<dish>
+		<name>Soup</name>
+		<price>9.95</price>
+		<description>
+			Variety of different soups, everybody will choose own perfect.
+		</description>
+		<calories>500</calories>
+		<mealTime>Dinner</mealTime>
+	</dish>
+	<dish>
+		<name>Porridge</name>
+		<price>7.95</price>
+		<description>
+			Variety of different porridges, everybody will choose own perfect.
+		</description>
+		<calories>300</calories>
+		<mealTime>Dinner</mealTime>
+	</dish>
+	<dish>
+		<name>Pizza</name>
+		<price>4.50</price>
+		<description>
+			No comments, only pizza
+		</description>
+		<calories>600</calories>
+		<mealTime>Supper</mealTime>
+	</dish>
+	<dish>
+		<name>Nothing</name>
+		<price>0.00</price>
+		<description>
+			Yes, I'm on a diet, what`s next?!
+		</description>
+		<calories>0</calories>
+		<mealTime>Supper</mealTime>
+	</dish>
+</menu>
