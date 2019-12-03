@@ -8,301 +8,239 @@ namespace Lab3
 {
     public partial class MainWindow : Form
     {
-        // GUI elements
-        RichTextBox ContentContainer;
-        ComboBox AuthorFilter, TitleFilter, GenreFilter;
-        TextBox DescriptionFilter, PriceFromFilter, PriceToFilter, YearFromFilter, YearToFilter;
-        RadioButton LINQ, DOM, SAX;
-        Button Search, Reload, Reset, Transform;
-        Label L1, L2, L3, L4, L5, L6, L7, L8;
-
-        // hardcoded paths
-        string XMLSourceFile = "../../data.xml";
-        string XSLTSourceFile = "../../rules.xsl";
-        string HTMLTargetFile = "../../transformed.html";
-
-        // logic elements
-        FilterOfDish CurrentFilter = new FilterOfDish(); // stores filters values
-        XMLAnalyzingStrategy Parser;
-
+        TextBox DishesData, DescriptionFilter, FilterForMinPrice, PriceToFilter, FilterForMinCalories, FilterForMaxCalories;
+        FilterOfDish RealDataOfFilters = new FilterOfDish(); 
+        
         public MainWindow()
         {
             InitializeComponent();
-
-            ContentContainer = new RichTextBox
-            {
-                Location = new Point(30, 60),
-                Size = new Size((Width - 120) / 2, ClientSize.Height - 80)
-            };
-            Controls.Add(ContentContainer);
-            InitializeFilters();
-            InitializeLabels();
-            InitializeControlButtons();
-            InitializeRadioButtons();
-
-            SizeChanged += XMLDataVisualizator_SizeChanged;
-            FormClosing += XMLDataVisualizator_Closing;
-
-            Parser = new LINQStrategy(XMLSourceFile);
-            FillVizualizator();
+            DishesData = new TextBox();
+            DishesData.Location = new Point(30, 60);
+            DishesData.Size = new Size((Width - 120) / 2, ClientSize.Height - 80);
+            SizeChanged += MainWindowSizeChanged;
+            FormClosing += MainWindowClosed;
+            Parser = new LINQStrategy(PathToXML);
+            Controls.Add(DishesData);
+            AddElements();
+            AddAnalyzData();
         }
+        string PathToXSLT = "../../template.xsl";
+        XMLAnalyzingStrategy Parser;
+        Label DishName, Description, MealTime, PresentationTime, Calories, Price, L7, L8;
+        ComboBox FilterForMealTime, FilterForName, FilterForPresentationTime;
+        Button Analyze, LoadData, SetEmptyFilter, XSLT;
+        string PathToHTML = "../../xslt.html";
+        RadioButton AnalyzeLINQ, AnalyzeDOM, AnalyzeSAX;
+        string PathToXML = "../../dishes.xml";
 
-        // GUI elements initializers
-        private void InitializeFilters()
+        void AddElements()
         {
-            AuthorFilter = new ComboBox
-            {
-                Location = new Point(190 + ContentContainer.Width, 40),
-                Size = new Size(ContentContainer.Width - 130, 100),
-                Font = new Font("Verdana", 12),
-                Name = "Author",
-            };
-
-            TitleFilter = new ComboBox
-            {
-                Location = new Point(190 + ContentContainer.Width,
-                AuthorFilter.Bounds.Bottom + 20),
-                Size = new Size(ContentContainer.Width - 130, 100),
-                Font = new Font("Verdana", 12),
-                Name = "Title",
-            };
-
-            DescriptionFilter = new TextBox
-            {
-                Location = new Point(190 + ContentContainer.Width,
-                TitleFilter.Bounds.Bottom + 20),
-                Size = new Size(ContentContainer.Width - 130, 100),
-                Font = new Font("Verdana", 12),
-                Name = "Description",
-            };
-
-            GenreFilter = new ComboBox
-            {
-                Location = new Point(190 + ContentContainer.Width,
-                DescriptionFilter.Bounds.Bottom + 20),
-                Size = new Size(ContentContainer.Width - 130, 100),
-                Font = new Font("Verdana", 12),
-                Name = "Genre",
-            };
-
-            YearFromFilter = new TextBox
-            {
-                Location = new Point(190 + ContentContainer.Width,
-                GenreFilter.Bounds.Bottom + 20),
-                Size = new Size((AuthorFilter.Width - 30) / 2, 100),
-                Font = new Font("Verdana", 10),
-                Name = "YearFrom",
-            };
-
-            YearToFilter = new TextBox
-            {
-                Location =
-                new Point(YearFromFilter.Right + 30,
-                GenreFilter.Bounds.Bottom + 20),
-                Size = new Size((AuthorFilter.Width - 30) / 2, 100),
-                Font = new Font("Verdana", 10),
-                Name = "YearTo",
-            };
-
-            PriceFromFilter = new TextBox
-            {
-                Location =
-                new Point(190 + ContentContainer.Width,
-                YearFromFilter.Bounds.Bottom + 20),
-                Size = new Size((AuthorFilter.Width - 30) / 2, 100),
-                Font = new Font("Verdana", 10),
-                Name = "PriceFrom",
-            };
-
-            PriceToFilter = new TextBox
-            {
-                Location = new Point(YearFromFilter.Right + 30,
-                YearFromFilter.Bounds.Bottom + 20),
-                Size = new Size((AuthorFilter.Width - 30) / 2, 100),
-                Font = new Font("Verdana", 10),
-                Name  = "PriceTo",
-            };
-            
-            AuthorFilter.TextChanged += FilterChanged;
-            GenreFilter.TextChanged += FilterChanged;
-            DescriptionFilter.TextChanged += FilterChanged;
-            TitleFilter.TextChanged += FilterChanged;
-            YearToFilter.TextChanged += FilterChanged;
-            YearFromFilter.TextChanged += FilterChanged;
-            PriceFromFilter.TextChanged += FilterChanged;
-            PriceToFilter.TextChanged += FilterChanged;
-
-            Controls.Add(AuthorFilter);
-            Controls.Add(TitleFilter);
-            Controls.Add(DescriptionFilter);
-            Controls.Add(GenreFilter);
-            Controls.Add(PriceFromFilter);
-            Controls.Add(PriceToFilter);
-            Controls.Add(YearFromFilter);
-            Controls.Add(YearToFilter);
+            AddFilters();
+            AddLabels();
+            AddControlButtons();
+            AddRadioButtons();
         }
-
-        private void InitializeRadioButtons()
+        void StrategyChanged(object sender, EventArgs e)
         {
-            SAX = new RadioButton()
-            {
-                Text = "SAX",
-                Name = "SAX",
-                Font = new Font("Verdana", 12),
-                Height = 30,
-                Location = new Point(Search.Left + 10, Search.Bottom + 15),
-            };
-            DOM = new RadioButton()
+            RadioButton selectedTool = sender as RadioButton;
+            if (selectedTool.Name == "AnalyzeLINQ") Parser = new LINQStrategy(PathToXML);
+            else if (selectedTool.Name == "AnalyzeDOM") Parser = new DOMStrategy(PathToXML);
+            else if (selectedTool.Name == "AnalyzeSAX") Parser = new SAXStrategy(PathToXML);
+        }
+        void AddRadioButtons()
+        {
+            AnalyzeDOM = new RadioButton()
             {
                 Text = "DOM",
                 Name = "DOM",
                 Height = 30,
-
-                Font = new Font("Verdana", 12),
-                Location = new Point(SAX.Right, SAX.Top),
+                Font = new Font("Times New Roman", 12),
+                Location = new Point(Analyze.Left + 10, Analyze.Bottom + 15),
             };
-            LINQ = new RadioButton()
+            AnalyzeDOM.CheckedChanged += StrategyChanged;
+            Controls.Add(AnalyzeDOM);
+            AnalyzeSAX = new RadioButton()
+            {
+                Text = "SAX",
+                Name = "SAX",
+                Font = new Font("Times New Roman", 12),
+                Height = 30,
+                Location = new Point(AnalyzeDOM.Right, AnalyzeDOM.Top),
+            };
+            AnalyzeSAX.CheckedChanged += StrategyChanged;
+            Controls.Add(AnalyzeSAX);
+            AnalyzeLINQ = new RadioButton()
             {
                 Text = "LINQ",
                 Name = "LINQ",
                 Checked = true,
                 Height = 30,
+                Font = new Font("Times New Roman", 12),
+                Location = new Point(AnalyzeSAX.Right, AnalyzeSAX.Top),
+            };
+            AnalyzeLINQ.CheckedChanged += StrategyChanged;
+            Controls.Add(AnalyzeLINQ);
+        }
+        void AddFilters()
+        {
+            FilterForMealTime = new ComboBox
+            {
+                Location = new Point(190 + DishesData.Width, 40),
+                Size = new Size(DishesData.Width - 130, 100),
+                Font = new Font("Times New Roman", 12),
+                Name = "MealTime",
+            };
 
-                Font = new Font("Verdana", 12),
-                Location = new Point(DOM.Right, SAX.Top),
+            FilterForName = new ComboBox
+            {
+                Location = new Point(190 + DishesData.Width,
+                FilterForMealTime.Bounds.Bottom + 20),
+                Size = new Size(DishesData.Width - 130, 100),
+                Font = new Font("Times New Roman", 12),
+                Name = "Name",
+            };
+
+            DescriptionFilter = new TextBox
+            {
+                Location = new Point(190 + DishesData.Width,
+                FilterForName.Bounds.Bottom + 20),
+                Size = new Size(DishesData.Width - 130, 100),
+                Font = new Font("Times New Roman", 12),
+                Name = "Description",
+            };
+
+            FilterForPresentationTime = new ComboBox
+            {
+                Location = new Point(190 + DishesData.Width,
+                DescriptionFilter.Bounds.Bottom + 20),
+                Size = new Size(DishesData.Width - 130, 100),
+                Font = new Font("Times New Roman", 12),
+                Name = "PresentationTime",
+            };
+
+            FilterForMinCalories = new TextBox
+            {
+                Location = new Point(190 + DishesData.Width,
+                FilterForPresentationTime.Bounds.Bottom + 20),
+                Size = new Size((FilterForMealTime.Width - 30) / 2, 100),
+                Font = new Font("Times New Roman", 10),
+                Name = "CaloriesFrom",
+            };
+
+            FilterForMaxCalories = new TextBox
+            {
+                Location =
+                new Point(FilterForMinCalories.Right + 30,
+                FilterForPresentationTime.Bounds.Bottom + 20),
+                Size = new Size((FilterForMealTime.Width - 30) / 2, 100),
+                Font = new Font("Times New Roman", 10),
+                Name = "CaloriesTo",
+            };
+
+            FilterForMinPrice = new TextBox
+            {
+                Location =
+                new Point(190 + DishesData.Width,
+                FilterForMinCalories.Bounds.Bottom + 20),
+                Size = new Size((FilterForMealTime.Width - 30) / 2, 100),
+                Font = new Font("Times New Roman", 10),
+                Name = "PriceFrom",
+            };
+
+            PriceToFilter = new TextBox
+            {
+                Location = new Point(FilterForMinCalories.Right + 30,
+                FilterForMinCalories.Bounds.Bottom + 20),
+                Size = new Size((FilterForMealTime.Width - 30) / 2, 100),
+                Font = new Font("Times New Roman", 10),
+                Name  = "PriceTo",
             };
             
+            FilterForMealTime.TextChanged += FilterChanged;
+            FilterForPresentationTime.TextChanged += FilterChanged;
+            DescriptionFilter.TextChanged += FilterChanged;
+            FilterForName.TextChanged += FilterChanged;
+            FilterForMaxCalories.TextChanged += FilterChanged;
+            FilterForMinCalories.TextChanged += FilterChanged;
+            FilterForMinPrice.TextChanged += FilterChanged;
+            PriceToFilter.TextChanged += FilterChanged;
 
-            LINQ.CheckedChanged += RadioButton_CheckedChanged;
-            DOM.CheckedChanged += RadioButton_CheckedChanged;
-            SAX.CheckedChanged += RadioButton_CheckedChanged;
-
-            Controls.Add(LINQ);
-            Controls.Add(DOM);
-            Controls.Add(SAX);
+            Controls.Add(FilterForMealTime);
+            Controls.Add(FilterForName);
+            Controls.Add(DescriptionFilter);
+            Controls.Add(FilterForPresentationTime);
+            Controls.Add(FilterForMinPrice);
+            Controls.Add(PriceToFilter);
+            Controls.Add(FilterForMinCalories);
+            Controls.Add(FilterForMaxCalories);
         }
-
-        private void InitializeControlButtons()
+        void AddLabels()
         {
-            Search = new Button()
-            {
-                Text = "Search",
-                Location = new Point(L1.Left + 20, PriceFromFilter.Bottom + 30),
-                Font = new Font("Verdana", 10),
-                Size = new Size(80, 40),
-            };
-            Reset = new Button()
-            {
-                Text = "Reset",
-                Location = new Point(Search.Bounds.Right + 30, Search.Bounds.Y),
-                Font = new Font("Verdana", 10),
-                Size = new Size(80, 40),
-            };
-            Reload = new Button()
-            {
-                Text = "Reload",
-                Location = new Point(Reset.Bounds.Right + 30, Reset.Bounds.Y),
-                Font = new Font("Verdana", 10),
-                Size = new Size(100, 40),
-            };
-
-            Search.Click += (s, e) => FillVizualizator();
-            Reload.Click += (s, e) => ReloadFile();
-            Reset.Click += (s, e) => ResetFilters();
-
-            Transform = new Button()
-            {
-                Text = "Convert to HTML",
-                Location = new Point((ContentContainer.Width - 200) / 2 + 30, 20),
-                Font = new Font("Verdana", 10),
-                Size = new Size(200, 30),
-            };
-
-            Transform.Click += (s, e) => TransformToHTML();
-
-            Controls.Add(Search);
-            Controls.Add(Reload);
-            Controls.Add(Reset);
-            Controls.Add(Transform);
-        }
-
-        private void InitializeLabels()
-        {
-            L1 = new Label()
+            DishName = new Label()
             {
                 Text = "Author:",
-                Location = new Point(ContentContainer.Width + 50, AuthorFilter.Top + 2),
+                Location = new Point(DishesData.Width + 50, FilterForMealTime.Top + 2),
                 Width = 140,
-                Font = new Font("Verdana", 12),
+                Font = new Font("Times New Roman", 12),
             };
-            L2 = new Label()
+            Description = new Label()
             {
                 Text = "Title:",
-                Location = new Point(ContentContainer.Width + 50, TitleFilter.Top + 2),
+                Location = new Point(DishesData.Width + 50, FilterForName.Top + 2),
                 Width = 140,
-                Font = new Font("Verdana", 12),
+                Font = new Font("Times New Roman", 12),
             };
-            L3 = new Label()
+            MealTime = new Label()
             {
                 Text = "Description:",
-                Location = new Point(ContentContainer.Width + 50, DescriptionFilter.Top + 2),
+                Location = new Point(DishesData.Width + 50, DescriptionFilter.Top + 2),
                 Width = 140,
-                Font = new Font("Verdana", 12),
+                Font = new Font("Times New Roman", 12),
             };
-            L4 = new Label()
+            PresentationTime = new Label()
             {
                 Text = "Genre:",
-                Location = new Point(ContentContainer.Width + 50, GenreFilter.Top + 2),
+                Location = new Point(DishesData.Width + 50, FilterForPresentationTime.Top + 2),
                 Width = 140,
-                Font = new Font("Verdana", 12),
+                Font = new Font("Times New Roman", 12),
             };
-            L5 = new Label()
+            Calories = new Label()
             {
                 Text = "Published:",
-                Location = new Point(ContentContainer.Width + 50, YearFromFilter.Top + 2),
+                Location = new Point(DishesData.Width + 50, FilterForMinCalories.Top + 2),
                 Width = 140,
-                Font = new Font("Verdana", 12),
+                Font = new Font("Times New Roman", 12),
             };
-            L6 = new Label()
+            Price = new Label()
             {
                 Text = "Price:",
-                Location = new Point(ContentContainer.Width + 50, PriceFromFilter.Top + 2),
+                Location = new Point(DishesData.Width + 50, FilterForMinPrice.Top + 2),
                 Width = 140,
-                Font = new Font("Verdana", 12),
+                Font = new Font("Times New Roman", 12),
             };
             L7 = new Label()
             {
                 Text = "-",
-                Location = new Point(YearFromFilter.Right + 5, YearFromFilter.Top),
-                Font = new Font("Verdana", 12),
+                Location = new Point(FilterForMinCalories.Right + 5, FilterForMinCalories.Top),
+                Font = new Font("Times New Roman", 12),
             };
             L8 = new Label()
             {
                 Text = "-",
-                Location = new Point(PriceFromFilter.Right + 5, PriceFromFilter.Top),
-                Font = new Font("Verdana", 12),
+                Location = new Point(FilterForMinPrice.Right + 5, FilterForMinPrice.Top),
+                Font = new Font("Times New Roman", 12),
             };
 
-            Controls.Add(L1);
-            Controls.Add(L2);
-            Controls.Add(L3);
-            Controls.Add(L4);
-            Controls.Add(L5);
-            Controls.Add(L6);
+            Controls.Add(DishName);
+            Controls.Add(Description);
+            Controls.Add(MealTime);
+            Controls.Add(PresentationTime);
+            Controls.Add(Calories);
+            Controls.Add(Price);
             Controls.Add(L7);
             Controls.Add(L8);
         }
-        
-        // event handlers
-        private void RadioButton_CheckedChanged(object sender, EventArgs e)
-        {
-            RadioButton selectedTool = sender as RadioButton;
-            if (selectedTool.Name == "LINQ") Parser = new LINQStrategy(XMLSourceFile);
-            else if (selectedTool.Name == "DOM") Parser = new DOMStrategy(XMLSourceFile);
-            else if (selectedTool.Name == "SAX") Parser = new SAXStrategy(XMLSourceFile);
-        }
-
-        private void FilterChanged(object sender, EventArgs e)
+        void FilterChanged(object sender, EventArgs e)
         {
             string newValue, propName;
             if (sender is TextBox)
@@ -310,77 +248,116 @@ namespace Lab3
                 TextBox f = sender as TextBox;
                 newValue = f.Text;
                 propName = f.Name;
-                CurrentFilter.ChangeFilter(propName, newValue);
+                RealDataOfFilters.ChangeFilter(propName, newValue);
             }
             else
             {
                 ComboBox f = sender as ComboBox;
                 newValue = f.Text;
                 propName = f.Name;
-                CurrentFilter.ChangeFilter(propName, newValue);
+                RealDataOfFilters.ChangeFilter(propName, newValue);
             }
         }
-
-        private void XMLDataVisualizator_SizeChanged(object sender, EventArgs e)
+        void AddControlButtons()
         {
-            ContentContainer.Size = new Size((Width - 120) / 2, ClientSize.Height - 80);
-
-            AuthorFilter.Location = new Point(190 + ContentContainer.Width, 40);
-            AuthorFilter.Size = new Size(ContentContainer.Width - 130, 100);
-
-            TitleFilter.Location = new Point(190 + ContentContainer.Width,
-                AuthorFilter.Bounds.Bottom + 20);
-            TitleFilter.Size = new Size(ContentContainer.Width - 130, 100);
-
-            DescriptionFilter.Location = new Point(190 + ContentContainer.Width,
-                TitleFilter.Bounds.Bottom + 20);
-             DescriptionFilter.Size = new Size(ContentContainer.Width - 130, 100);
-
-            GenreFilter.Location = new Point(190 + ContentContainer.Width,
-                DescriptionFilter.Bounds.Bottom + 20);
-                GenreFilter.Size = new Size(ContentContainer.Width - 130, 100);
-
-            YearFromFilter.Location = new Point(190 + ContentContainer.Width,
-                GenreFilter.Bounds.Bottom + 20);
-            YearFromFilter.Size = new Size((AuthorFilter.Width - 30) / 2, 100);
-
-            YearToFilter.Location =
-                new Point(YearFromFilter.Right + 30,
-                GenreFilter.Bounds.Bottom + 20);
-            YearToFilter.Size = new Size((AuthorFilter.Width - 30) / 2, 100);
-
-            PriceFromFilter.Location =
-                new Point(190 + ContentContainer.Width,
-                YearFromFilter.Bounds.Bottom + 20);
-            PriceFromFilter.Size = new Size((AuthorFilter.Width - 30) / 2, 100);
-
-            PriceToFilter.Location = new Point(YearFromFilter.Right + 30,
-                YearFromFilter.Bounds.Bottom + 20);
-            PriceToFilter.Size = new Size((AuthorFilter.Width - 30) / 2, 100);
-
-            L1.Location = new Point(ContentContainer.Width + 50, AuthorFilter.Top + 2);
-            L2.Location = new Point(ContentContainer.Width + 50, TitleFilter.Top + 2);
-            L3.Location = new Point(ContentContainer.Width + 50, DescriptionFilter.Top + 2);
-            L4.Location = new Point(ContentContainer.Width + 50, GenreFilter.Top + 2);
-            L5.Location = new Point(ContentContainer.Width + 50, YearFromFilter.Top + 2);
-            L6.Location = new Point(ContentContainer.Width + 50, PriceFromFilter.Top + 2);
-            L7.Location = new Point(YearFromFilter.Right + 5, YearFromFilter.Top);
-            L8.Location = new Point(PriceFromFilter.Right + 5, PriceFromFilter.Top);
-
-            Search.Location = new Point(AuthorFilter.Right - 320 - 
-                (AuthorFilter.Right - L1.Left - 320) / 2, 
-                PriceFromFilter.Bottom + 30);
-            Reset.Location = new Point(Search.Bounds.Right + 30, Search.Bounds.Y);
-            Reload.Location = new Point(Reset.Bounds.Right + 30, Reset.Bounds.Y);
-
-            SAX.Location = new Point(Search.Left + 10, Search.Bottom + 15);
-            DOM.Location = new Point(SAX.Right, SAX.Top);
-            LINQ.Location = new Point(DOM.Right, SAX.Top);
-
-            Transform.Location = new Point((ContentContainer.Width - 200) / 2 + 30, 20);
+            Analyze = new Button()
+            {
+                Text = "Analyze",
+                Location = new Point(DishName.Left + 20, FilterForMinPrice.Bottom + 30),
+                Font = new Font("Times New Roman", 10),
+                Size = new Size(80, 40),
+            };
+            Analyze.Click += (s, e) => AddAnalyzData();
+            Controls.Add(Analyze);
+            SetEmptyFilter = new Button()
+            {
+                Text = "Empty",
+                Location = new Point(Analyze.Bounds.Right + 30, Analyze.Bounds.Y),
+                Font = new Font("Times New Roman", 10),
+                Size = new Size(80, 40),
+            };
+            SetEmptyFilter.Click += (s, e) => SetEmptyFilterFilters();
+            Controls.Add(SetEmptyFilter);
+            LoadData = new Button()
+            {
+                Text = "Load",
+                Location = new Point(SetEmptyFilter.Bounds.Right + 30, SetEmptyFilter.Bounds.Y),
+                Font = new Font("Times New Roman", 10),
+                Size = new Size(100, 40),
+            };
+            LoadData.Click += (s, e) => LoadDataFile();
+            Controls.Add(LoadData);
+            XSLT = new Button()
+            {
+                Text = "XSLT To HTML",
+                Location = new Point((DishesData.Width - 200) / 2 + 30, 20),
+                Font = new Font("Times New Roman", 10),
+                Size = new Size(200, 30),
+            };
+            XSLT.Click += (s, e) => XSLTToHTML();
+            Controls.Add(XSLT);
         }
 
-        private void XMLDataVisualizator_Closing(object sender, FormClosingEventArgs e)
+        void MainWindowSizeChanged(object sender, EventArgs e)
+        {
+            DishesData.Size = new Size((Width - 120) / 2, ClientSize.Height - 80);
+
+            FilterForMealTime.Location = new Point(190 + DishesData.Width, 40);
+            FilterForMealTime.Size = new Size(DishesData.Width - 130, 100);
+
+            FilterForName.Location = new Point(190 + DishesData.Width,
+                FilterForMealTime.Bounds.Bottom + 20);
+            FilterForName.Size = new Size(DishesData.Width - 130, 100);
+
+            DescriptionFilter.Location = new Point(190 + DishesData.Width,
+                FilterForName.Bounds.Bottom + 20);
+             DescriptionFilter.Size = new Size(DishesData.Width - 130, 100);
+
+            FilterForPresentationTime.Location = new Point(190 + DishesData.Width,
+                DescriptionFilter.Bounds.Bottom + 20);
+                FilterForPresentationTime.Size = new Size(DishesData.Width - 130, 100);
+
+            FilterForMinCalories.Location = new Point(190 + DishesData.Width,
+                FilterForPresentationTime.Bounds.Bottom + 20);
+            FilterForMinCalories.Size = new Size((FilterForMealTime.Width - 30) / 2, 100);
+
+            FilterForMaxCalories.Location =
+                new Point(FilterForMinCalories.Right + 30,
+                FilterForPresentationTime.Bounds.Bottom + 20);
+            FilterForMaxCalories.Size = new Size((FilterForMealTime.Width - 30) / 2, 100);
+
+            FilterForMinPrice.Location =
+                new Point(190 + DishesData.Width,
+                FilterForMinCalories.Bounds.Bottom + 20);
+            FilterForMinPrice.Size = new Size((FilterForMealTime.Width - 30) / 2, 100);
+
+            PriceToFilter.Location = new Point(FilterForMinCalories.Right + 30,
+                FilterForMinCalories.Bounds.Bottom + 20);
+            PriceToFilter.Size = new Size((FilterForMealTime.Width - 30) / 2, 100);
+
+            DishName.Location = new Point(DishesData.Width + 50, FilterForMealTime.Top + 2);
+            Description.Location = new Point(DishesData.Width + 50, FilterForName.Top + 2);
+            MealTime.Location = new Point(DishesData.Width + 50, DescriptionFilter.Top + 2);
+            PresentationTime.Location = new Point(DishesData.Width + 50, FilterForPresentationTime.Top + 2);
+            Calories.Location = new Point(DishesData.Width + 50, FilterForMinCalories.Top + 2);
+            Price.Location = new Point(DishesData.Width + 50, FilterForMinPrice.Top + 2);
+            L7.Location = new Point(FilterForMinCalories.Right + 5, FilterForMinCalories.Top);
+            L8.Location = new Point(FilterForMinPrice.Right + 5, FilterForMinPrice.Top);
+
+            Analyze.Location = new Point(FilterForMealTime.Right - 320 - 
+                (FilterForMealTime.Right - DishName.Left - 320) / 2, 
+                FilterForMinPrice.Bottom + 30);
+            SetEmptyFilter.Location = new Point(Analyze.Bounds.Right + 30, Analyze.Bounds.Y);
+            LoadData.Location = new Point(SetEmptyFilter.Bounds.Right + 30, SetEmptyFilter.Bounds.Y);
+
+            AnalyzeSAX.Location = new Point(Analyze.Left + 10, Analyze.Bottom + 15);
+            AnalyzeDOM.Location = new Point(AnalyzeSAX.Right, AnalyzeSAX.Top);
+            AnalyzeLINQ.Location = new Point(AnalyzeDOM.Right, AnalyzeSAX.Top);
+
+            XSLT.Location = new Point((DishesData.Width - 200) / 2 + 30, 20);
+        }
+
+        void MainWindowClosed(object sender, FormClosingEventArgs e)
         {
             var result = MessageBox.Show("Are you sure you want to leave?", "Exit confirmation",
                 MessageBoxButtons.YesNo, MessageBoxIcon.Question);
@@ -389,49 +366,53 @@ namespace Lab3
         }
 
 
-        // logic implementation
-        private void FillVizualizator() // fills data depending on current filters
+        void AddAnalyzData()
         {
-            var res = Parser.Analyze(CurrentFilter);
-            ContentContainer.Text = 
-                String.IsNullOrWhiteSpace(res.DishesList)
-                ? "Books not found :("
-                : res.DishesList;
+            var res = Parser.Analyze(RealDataOfFilters);
+            string dishesStr = "";
+            int i = 0;
+            foreach (var dish in res.DishesList)
+            {
+                i++;
+                dishesStr = dishesStr + dish.DishToString(i);
+                dishesStr = dishesStr + "\n";
+            }
+            DishesData.Text = (dishesStr == "")? "No such dishes" : dishesStr;
 
-            AuthorFilter.Items.Clear();
-            TitleFilter.Items.Clear();
-            GenreFilter.Items.Clear();
+            FilterForMealTime.Items.Clear();
+            FilterForName.Items.Clear();
+            FilterForPresentationTime.Items.Clear();
             
-            AuthorFilter.Items.AddRange(res.MealTime.ToArray());
-            TitleFilter.Items.AddRange(res.Names.ToArray());
-            GenreFilter.Items.AddRange(res.Genres.ToArray());
+            FilterForMealTime.Items.AddRange(res.MealTimes);
+            FilterForName.Items.AddRange(res.Names);
+            FilterForPresentationTime.Items.AddRange(res.PresentationTimes);
         }
 
-        private void ResetFilters()
+        void SetEmptyFilterFilters()
         {
-            CurrentFilter = new FilterOfDish();
-            AuthorFilter.Text = "";
-            TitleFilter.Text = "";
-            GenreFilter.Text = "";
+            RealDataOfFilters = new FilterOfDish();
+            FilterForMealTime.Text = "";
+            FilterForName.Text = "";
+            FilterForPresentationTime.Text = "";
             DescriptionFilter.Text = ""; 
-            PriceFromFilter.Text = "";
+            FilterForMinPrice.Text = "";
             PriceToFilter.Text = "";
-            YearFromFilter.Text = "";
-            YearToFilter.Text = "";
-            FillVizualizator();
+            FilterForMinCalories.Text = "";
+            FilterForMaxCalories.Text = "";
+            AddAnalyzData();
         }
 
-        private void ReloadFile()
+        void LoadDataFile()
         {
-            Parser.GetXMLData(XMLSourceFile);
-            FillVizualizator();
+            Parser.GetXMLData(PathToXML);
+            AddAnalyzData();
         }
 
-        private void TransformToHTML()
+        void XSLTToHTML()
         {
             XslCompiledTransform transform = new XslCompiledTransform();
-            transform.GetXMLData(XSLTSourceFile);
-            transform.Transform(XMLSourceFile, HTMLTargetFile);
+            transform.Load(PathToXSLT);
+            transform.Transform(PathToXML, PathToHTML);
         }
     }
 }

@@ -48,7 +48,7 @@
 		</description>
 		<calories>950</calories>
 		<mealTime>Breakfast</mealTime>
-		<presentationTime>Regular</presentationTime
+		<presentationTime>Regular</presentationTime>
 	</dish>
 	<dish>
 		<name>Borsch</name>
@@ -79,7 +79,6 @@
 		<calories>300</calories>
 		<mealTime>Dinner</mealTime>
 		<presentationTime>Regular</presentationTime>
-
 	</dish>
 	<dish>
 		<name>Pizza</name>
@@ -89,6 +88,7 @@
 		</description>
 		<calories>600</calories>
 		<mealTime>Supper</mealTime>
+		<presentationTime>Regular</presentationTime>
 	</dish>
 	<dish>
 		<name>Nothing</name>
@@ -98,5 +98,6 @@
 		</description>
 		<calories>0</calories>
 		<mealTime>Supper</mealTime>
+		<presentationTime>Regular</presentationTime>
 	</dish>
 </menu>
