@@ -66,10 +66,6 @@ namespace Lab3
             {
                 NumberDecimalSeparator = "."
             };
-            Console.WriteLine(Convert.ToSingle(possible.Price, nfi) >= PriceFrom);
-            Console.WriteLine(Convert.ToSingle(possible.Price, nfi) <= PriceTo);
-            Console.WriteLine(Convert.ToSingle(possible.Calories, nfi) >= CaloriesFrom);
-            Console.WriteLine(Convert.ToSingle(possible.Calories, nfi) <= CaloriesTo);
             var match = (possible.Name.ToLower().Contains(Name.ToLower())
                 && possible.MealTime.ToLower().Contains(MealTime.ToLower())
                 && possible.PresentationTime.ToLower().Contains(PresentationTime.ToLower())

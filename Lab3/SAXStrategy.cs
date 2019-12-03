@@ -42,6 +42,18 @@ namespace Lab3
                                 dish.Name = Reader.Value;
                                 names.Add(Reader.Value);
                                 break;
+                            case "price":
+                                Reader.Read();
+                                dish.Price = Reader.Value;
+                                break;
+                            case "description":
+                                Reader.Read();
+                                dish.Description = Reader.Value.Trim();
+                                break;
+                            case "calories":
+                                Reader.Read();
+                                dish.Calories = Reader.Value;
+                                break;
                             case "mealTime":
                                 Reader.Read();
                                 dish.MealTime = Reader.Value;
@@ -51,18 +63,6 @@ namespace Lab3
                                 Reader.Read();
                                 dish.PresentationTime = Reader.Value;
                                 presentationtimes.Add(Reader.Value);
-                                break;
-                            case "description":
-                                Reader.Read();
-                                dish.Price = Reader.Value.Trim();
-                                break;
-                            case "price":
-                                Reader.Read();
-                                dish.Price = Reader.Value;
-                                break;
-                            case "calories":
-                                Reader.Read();
-                                dish.Calories = Reader.Value;
                                 break;
                             default:
                                 break;

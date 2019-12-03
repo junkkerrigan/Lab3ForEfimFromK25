@@ -19,7 +19,6 @@ namespace Lab3
         public ResultOfParsing Analyze(FilterOfDish filter)
         {
             var dishNodes = xmlDoc.SelectNodes("/menu/dish");
-            Console.WriteLine(dishNodes.Count);
             List<Dish> match = new List<Dish>();
             List<string> names = new List<string>();
             List<string> mealtimes = new List<string>();
@@ -37,7 +36,6 @@ namespace Lab3
                 };
                 if (filter.CheckDish(dish))
                 {
-                    Console.WriteLine(dish.DishToString(1));
                     match.Add(dish);
                     names.Add(dish.Name);
                     mealtimes.Add(dish.MealTime);

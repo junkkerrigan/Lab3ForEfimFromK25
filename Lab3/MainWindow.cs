@@ -301,7 +301,7 @@ namespace Lab3
                 dishesStr = dishesStr + dish.DishToString(i);
                 dishesStr = dishesStr + "\n";
             }
-            DishesData.Text = (dishesStr == "")? "No such dishes" : dishesStr;
+            DishesData.Text = dishesStr;
 
             FilterForMealTime.Items.Clear();
             FilterForName.Items.Clear();
@@ -332,22 +332,22 @@ namespace Lab3
         void MainWindowSizeChanged(object sender, EventArgs e)
         {
 
-            FilterForMealTime.Size = new Size((Width - 120) / 2 - 130, 100);
-
-            DishesData.Size = new Size((Width - 120) / 2, ClientSize.Height - 60);
-            DishesData.Location = new Point(FilterForMealTime.Right + 50, 30);
-
-            FilterForName.Location = new Point(150,
-                FilterForMealTime.Bounds.Bottom + 20);
             FilterForName.Size = new Size((Width - 120) / 2 - 130, 100);
 
-            FilterForDescription.Location = new Point(150,
+            DishesData.Size = new Size((Width - 120) / 2, ClientSize.Height - 60);
+            DishesData.Location = new Point(FilterForName.Right + 50, 30);
+
+            FilterForMealTime.Location = new Point(150,
                 FilterForName.Bounds.Bottom + 20);
+            FilterForMealTime.Size = new Size((Width - 120) / 2 - 130, 100);
+
+            FilterForDescription.Location = new Point(150,
+                FilterForMealTime.Bounds.Bottom + 20);
              FilterForDescription.Size = new Size((Width - 120) / 2 - 130, 100);
 
             FilterForPresentationTime.Location = new Point(150,
                 FilterForDescription.Bounds.Bottom + 20);
-                FilterForPresentationTime.Size = new Size((Width - 120) / 2 - 130, 100);
+            FilterForPresentationTime.Size = new Size((Width - 120) / 2 - 130, 100);
 
             FilterForMinCalories.Location = new Point(150,
                 FilterForPresentationTime.Bounds.Bottom + 20);
@@ -367,9 +367,9 @@ namespace Lab3
                 FilterForMinCalories.Bounds.Bottom + 20);
             FilterForMaxPrice.Size = new Size((FilterForMealTime.Width - 30) / 2, 100);
 
-            DishName.Location = new Point(10, FilterForMealTime.Top + 6);
-            Description.Location = new Point(10, FilterForName.Top + 4);
-            MealTime.Location = new Point(10, FilterForDescription.Top + 4);
+            MealTime.Location = new Point(10, FilterForMealTime.Top + 6);
+            Description.Location = new Point(10, FilterForDescription.Top + 4);
+            MealTime.Location = new Point(10, FilterForMealTime.Top + 4);
             PresentationTime.Location = new Point(10, FilterForPresentationTime.Top + 4);
             Calories.Location = new Point(10, FilterForMinCalories.Top + 4);
             Price.Location = new Point(10, FilterForMinPrice.Top + 4);
@@ -382,9 +382,9 @@ namespace Lab3
             SetEmptyFilter.Location = new Point(Analyze.Bounds.Right + 10, Analyze.Bounds.Y);
             LoadData.Location = new Point(SetEmptyFilter.Bounds.Right + 10, SetEmptyFilter.Bounds.Y);
 
-            AnalyzeSAX.Location = new Point(Analyze.Left + 10, Analyze.Bottom + 15);
-            AnalyzeDOM.Location = new Point(AnalyzeSAX.Right, AnalyzeSAX.Top);
-            AnalyzeLINQ.Location = new Point(AnalyzeDOM.Right, AnalyzeSAX.Top);
+            AnalyzeDOM.Location = new Point(Analyze.Left + 10, Analyze.Bottom + 15);
+            AnalyzeSAX.Location = new Point(AnalyzeDOM.Right, AnalyzeDOM.Top);
+            AnalyzeLINQ.Location = new Point(AnalyzeSAX.Right, AnalyzeSAX.Top);
 
             XSLT.Location = new Point(LoadData.Right + 10, LoadData.Bounds.Y);
         }

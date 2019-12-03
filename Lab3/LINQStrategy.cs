@@ -26,7 +26,7 @@ namespace Lab3
                     Name = book.Element("name").Value,
                     MealTime = book.Element("mealTime").Value,
                     PresentationTime = book.Element("presentationTime").Value,
-                    Description = book.Element("description").Value,
+                    Description = book.Element("description").Value.Trim(),
                     Price = book.Element("price").Value,
                     Calories = book.Element("calories").Value,
                 });
