@@ -8,16 +8,11 @@ namespace Lab3
 {
     public class Dish
     {
-        public string DishToString(int number)
+        public string DishToString()
         {
-            return
-                $"#{number}\n" +
-                $"Name: {Name}\n" +
-                $"Description: {Description}\n" +
-                $"Calories: {Calories}\n" +
-                $"Preffered mealtime: {MealTime}\n" +
-                $"Time of presentaton: {PresentationTime}\n" +
-                $"Price: {Price}\n";
+            return $"Name: {Name}\n" + $"Description: {Description}\n" +
+                $"Calories: {Calories}\n" + $"Preffered mealtime: {MealTime}\n" +
+                $"Time of presentaton: {PresentationTime}\n" + $"Price: {Price}\n";
         }
         public string Name { get; set; } = "";
         public string Price { get; set; } = "";

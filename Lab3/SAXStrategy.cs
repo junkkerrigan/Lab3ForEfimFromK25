@@ -40,7 +40,6 @@ namespace Lab3
                             case "name":
                                 Reader.Read();
                                 dish.Name = Reader.Value;
-                                names.Add(Reader.Value);
                                 break;
                             case "price":
                                 Reader.Read();
@@ -57,12 +56,10 @@ namespace Lab3
                             case "mealTime":
                                 Reader.Read();
                                 dish.MealTime = Reader.Value;
-                                mealtimes.Add(Reader.Value);
                                 break;
                             case "presentationTime":
                                 Reader.Read();
                                 dish.PresentationTime = Reader.Value;
-                                presentationtimes.Add(Reader.Value);
                                 break;
                             default:
                                 break;
@@ -73,6 +70,9 @@ namespace Lab3
                         {
                             if (filter.CheckDish(dish))
                             {
+                                mealtimes.Add(dish.MealTime);
+                                names.Add(dish.Name);
+                                presentationtimes.Add(dish.PresentationTime);
                                 i++;
                                 match.Add(dish);
                             }

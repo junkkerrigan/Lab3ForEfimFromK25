@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 using System.Xml.Xsl;
@@ -298,7 +300,7 @@ namespace Lab3
             foreach (var dish in res.DishesList)
             {
                 i++;
-                dishesStr = dishesStr + dish.DishToString(i);
+                dishesStr = dishesStr + dish.DishToString();
                 dishesStr = dishesStr + "\n";
             }
             DishesData.Text = dishesStr;
